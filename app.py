@@ -66,3 +66,80 @@ def generate_pdf():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+# HTML (index.html)
+
+index_html = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Asset Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>IT Asset Tracker</h1>
+    <form id="addAssetForm">
+        <label for="asset_type">Asset Type:</label>
+        <input type="text" id="asset_type" name="asset_type" required><br>
+        
+        <label for="serial_number">Serial Number:</label>
+        <input type="text" id="serial_number" name="serial_number" required><br>
+        
+        <label for="assigned_to">Assigned To:</label>
+        <input type="text" id="assigned_to" name="assigned_to" required><br>
+        
+        <label for="location">Location:</label>
+        <input type="text" id="location" name="location" required><br>
+        
+        <button type="submit">Add Asset</button>
+    </form>
+
+    <h2>Asset List</h2>
+    <table id="assetTable">
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>Serial</th>
+                <th>Assigned To</th>
+                <th>Location</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        document.getElementById('addAssetForm').onsubmit = function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+
+            fetch('/add_asset', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(() => {
+                alert('Asset added successfully!');
+                location.reload();
+            });
+        };
+
+        fetch('/assets')
+        .then(response => response.json())
+        .then(data => {
+            const tableBody = document.querySelector('#assetTable tbody');
+            data.forEach(asset => {
+                const row = tableBody.insertRow();
+                row.innerHTML = `<td>${asset.asset_type}</td><td>${asset.serial_number}</td><td>${asset.assigned_to}</td><td>${asset.location}</td>`;
+            });
+        });
+    </script>
+</body>
+</html>
+"""
+
+with open('templates/index.html', 'w') as f:
+    f.write(index_html)
